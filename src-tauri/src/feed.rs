@@ -19,9 +19,9 @@ pub fn normalize_url(url: &str) -> Result<String, String> {
         u.to_string()
     };
     if !(u.starts_with("https://") || u.starts_with("http://")) {
-        return Err("http(s):// 또는 webcal:// 로 시작하는 URL을 입력해 주세요.".into());
+        return Err("请输入以 http://、https:// 或 webcal:// 开头的订阅地址。".into());
     }
-    url::Url::parse(&u).map_err(|e| format!("잘못된 URL: {e}"))?;
+    url::Url::parse(&u).map_err(|e| format!("订阅地址无效：{e}"))?;
     Ok(u)
 }
 
@@ -31,14 +31,14 @@ async fn fetch_text(http: &reqwest::Client, url: &str) -> Result<String, String>
         .header("User-Agent", "DeskCal/0.1")
         .send()
         .await
-        .map_err(|e| format!("피드 다운로드 실패: {e}"))?;
+        .map_err(|e| format!("下载订阅日历失败：{e}"))?;
     let status = resp.status();
     if !status.is_success() {
-        return Err(format!("피드 다운로드 실패 ({status})"));
+        return Err(format!("下载订阅日历失败（{status}）"));
     }
-    let text = resp.text().await.map_err(|e| e.to_string())?;
+    let text = resp.text().await.map_err(|e| format!("无法读取订阅日历内容：{e}"))?;
     if !text.to_uppercase().contains("BEGIN:VCALENDAR") {
-        return Err("iCalendar(.ics) 형식이 아닙니다.".into());
+        return Err("订阅内容不是 iCalendar（.ics）格式。".into());
     }
     Ok(text)
 }
@@ -77,7 +77,7 @@ pub async fn fetch(
     let text = fetch_text(http, &feed.url).await?;
     let (cal_name, cal_color) = calendar_props(&text);
     let name = if feed.name.trim().is_empty() {
-        cal_name.unwrap_or_else(|| "iCal 구독".into())
+        cal_name.unwrap_or_else(|| "iCal 订阅".into())
     } else {
         feed.name.clone()
     };

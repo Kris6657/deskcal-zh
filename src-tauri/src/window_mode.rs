@@ -22,7 +22,7 @@ mod win {
     }
 
     fn find_progman() -> Result<HWND, String> {
-        unsafe { FindWindowW(w!("Progman"), PCWSTR::null()).map_err(|e| format!("Progman not found: {e}")) }
+        unsafe { FindWindowW(w!("Progman"), PCWSTR::null()).map_err(|e| format!("找不到 Progman 窗口：{e}")) }
     }
 
     struct EnumState {
@@ -207,6 +207,6 @@ pub fn apply(_window: &WebviewWindow, mode: WindowMode) -> Result<(), String> {
     if mode == WindowMode::Floating {
         Ok(())
     } else {
-        Err("이 창 모드는 Windows에서만 지원됩니다.".into())
+        Err("此窗口模式仅支持 Windows。".into())
     }
 }

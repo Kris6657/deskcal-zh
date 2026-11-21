@@ -56,29 +56,19 @@ fn triggers(ev: &CalEvent, settings: &Settings) -> Vec<(DateTime<Local>, i64)> {
         .collect()
 }
 
-fn format_time(dt: &DateTime<Local>) -> String {
-    let (h, m) = (dt.format("%H").to_string().parse::<u32>().unwrap_or(0), dt.format("%M").to_string());
-    let ampm = if h < 12 { "오전" } else { "오후" };
-    let h12 = match h % 12 {
-        0 => 12,
-        x => x,
-    };
-    format!("{ampm} {h12}:{m}")
-}
-
 fn body_for(ev: &CalEvent, cal_name: &str, lead_min: i64) -> String {
     let mut parts = Vec::new();
     if ev.all_day {
-        parts.push("종일".to_string());
+        parts.push("全天".to_string());
     } else if let Some(start) = parse_start(ev) {
         let when = if lead_min <= 0 {
-            "지금 시작".to_string()
+            "现在开始".to_string()
         } else if lead_min % 60 == 0 {
-            format!("{}시간 후 시작", lead_min / 60)
+            format!("{} 小时后开始", lead_min / 60)
         } else {
-            format!("{lead_min}분 후 시작")
+            format!("{lead_min} 分钟后开始")
         };
-        parts.push(format!("{} · {}", format_time(&start), when));
+        parts.push(format!("{} · {when}", start.format("%H:%M")));
     }
     if let Some(loc) = &ev.location {
         parts.push(loc.clone());
@@ -157,8 +147,9 @@ mod tests {
     #[test]
     fn body_mentions_lead_time() {
         let e = ev("2026-09-10T15:00:00+09:00", false, vec![10]);
-        assert!(body_for(&e, "내 캘린더", 10).contains("10분 후 시작"));
-        assert!(body_for(&e, "내 캘린더", 60).contains("1시간 후 시작"));
+        let time = parse_start(&e).unwrap().format("%H:%M").to_string();
+        assert_eq!(body_for(&e, "我的日历", 10), format!("{time} · 10 分钟后开始\n我的日历"));
+        assert!(body_for(&e, "我的日历", 60).contains("1 小时后开始"));
     }
 }
 

@@ -46,7 +46,7 @@ pub fn vevents_to_events(
             calendar_id: cal_id.to_string(),
             remote_id: rid,
             editable: editable_base && !is_recurring,
-            title: ev.value("SUMMARY").unwrap_or_else(|| "(제목 없음)".into()),
+            title: ev.value("SUMMARY").unwrap_or_else(|| "（无标题）".into()),
             start: start.to_iso(),
             end: end.to_iso(),
             all_day: start.is_date(),
@@ -230,11 +230,11 @@ pub fn parse_input_when(s: &str, all_day: bool) -> Result<When, String> {
     if all_day {
         NaiveDate::parse_from_str(s, "%Y-%m-%d")
             .map(When::Date)
-            .map_err(|_| format!("잘못된 날짜: {s}"))
+            .map_err(|_| format!("日期无效：{s}"))
     } else {
         DateTime::parse_from_rfc3339(s)
             .map(When::DateTime)
-            .map_err(|_| format!("잘못된 일시: {s}"))
+            .map_err(|_| format!("日期或时间无效：{s}"))
     }
 }
 
@@ -372,7 +372,7 @@ pub fn build_ics(uid: &str, input: &EventInput, existing: Option<&str>) -> Resul
                 out.push(line);
             }
             if !done {
-                return Err("기존 일정 데이터를 해석할 수 없습니다.".into());
+                return Err("无法解析现有日程数据。".into());
             }
         }
         None => {

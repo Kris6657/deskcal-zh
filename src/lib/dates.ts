@@ -77,34 +77,25 @@ export function eventLastDay(ev: CalEvent): Date {
   return eDay;
 }
 
-/** "오전 9시" / "오후 1:30" style. */
+/** "9:00" / "13:30" for compact event chips. */
 export function fmtTimeShort(d: Date): string {
-  const h = d.getHours();
-  const m = d.getMinutes();
-  const ampm = h < 12 ? "오전" : "오후";
-  const hh = h % 12 || 12;
-  return m === 0 ? `${ampm} ${hh}시` : `${ampm} ${hh}:${String(m).padStart(2, "0")}`;
+  return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
-/** "오전 9:00" style (always with minutes). */
+/** "09:00" for event details and sync status. */
 export function fmtTimeFull(d: Date): string {
-  const h = d.getHours();
-  const m = d.getMinutes();
-  const ampm = h < 12 ? "오전" : "오후";
-  const hh = h % 12 || 12;
-  return `${ampm} ${hh}:${String(m).padStart(2, "0")}`;
+  return timeKey(d);
 }
 
-export const WEEKDAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
+export const WEEKDAY_LABELS = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 
-/** "9월 1일 (화)" */
-export function fmtDateKo(d: Date, withYear = false): string {
-  const base = `${d.getMonth() + 1}월 ${d.getDate()}일 (${WEEKDAY_LABELS[d.getDay()]})`;
-  return withYear ? `${d.getFullYear()}년 ${base}` : base;
+/** "9月1日（周二）" */
+function fmtDate(d: Date): string {
+  return `${d.getMonth() + 1}月${d.getDate()}日（${WEEKDAY_LABELS[d.getDay()]}）`;
 }
 
 export function fmtMonthTitle(d: Date): string {
-  return `${d.getFullYear()}년 ${d.getMonth() + 1}월`;
+  return `${d.getFullYear()}年${d.getMonth() + 1}月`;
 }
 
 /** Human readable range for the detail popover. */
@@ -122,19 +113,19 @@ export function fmtEventRange(ev: CalEvent): string {
     e.getTime() > s.getTime();
   if (ev.allDay || isAllDayString(ev.start) || midnightSpan) {
     const last = eventLastDay(ev);
-    if (isSameDay(s, last)) return `${fmtDateKo(s)} · 하루종일`;
-    return `${fmtDateKo(s)} – ${fmtDateKo(last)} · 하루종일`;
+    if (isSameDay(s, last)) return `${fmtDate(s)} · 全天`;
+    return `${fmtDate(s)} – ${fmtDate(last)} · 全天`;
   }
   if (isSameDay(s, e) || e.getTime() <= s.getTime()) {
-    return `${fmtDateKo(s)} · ${fmtTimeFull(s)} – ${fmtTimeFull(e)}`;
+    return `${fmtDate(s)} · ${fmtTimeFull(s)} – ${fmtTimeFull(e)}`;
   }
-  return `${fmtDateKo(s)} ${fmtTimeFull(s)} – ${fmtDateKo(e)} ${fmtTimeFull(e)}`;
+  return `${fmtDate(s)} ${fmtTimeFull(s)} – ${fmtDate(e)} ${fmtTimeFull(e)}`;
 }
 
 export function fmtSyncedAt(iso: string): string {
   const d = new Date(iso);
   if (isNaN(d.getTime())) return "";
-  return `${d.getMonth() + 1}/${d.getDate()} ${fmtTimeFull(d)}`;
+  return `${d.getMonth() + 1}月${d.getDate()}日 ${fmtTimeFull(d)}`;
 }
 
 /**

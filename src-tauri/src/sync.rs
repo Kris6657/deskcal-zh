@@ -36,7 +36,7 @@ async fn do_sync(app: &AppHandle, range_start: NaiveDate, range_end: NaiveDate) 
         let Some(refresh) = store::get_secret(&store::google_secret_key(&account.id)) else {
             errors.push(SyncError {
                 provider: Provider::Google,
-                message: format!("{}: 저장된 로그인 정보가 없습니다. 설정에서 다시 로그인해 주세요.", account.email),
+                message: format!("{}：找不到登录信息，请在设置中重新登录。", account.email),
             });
             continue;
         };
@@ -64,7 +64,7 @@ async fn do_sync(app: &AppHandle, range_start: NaiveDate, range_end: NaiveDate) 
                         match r {
                             Ok(Ok(evs)) => events.extend(evs),
                             Ok(Err(e)) => errors.push(SyncError { provider: Provider::Google, message: e }),
-                            Err(e) => errors.push(SyncError { provider: Provider::Google, message: e.to_string() }),
+                            Err(e) => errors.push(SyncError { provider: Provider::Google, message: format!("同步任务失败：{e}") }),
                         }
                     }
                     calendars.extend(cals);
@@ -100,7 +100,7 @@ async fn do_sync(app: &AppHandle, range_start: NaiveDate, range_end: NaiveDate) 
                         match r {
                             Ok(Ok(evs)) => events.extend(evs),
                             Ok(Err(e)) => errors.push(SyncError { provider: Provider::Apple, message: e }),
-                            Err(e) => errors.push(SyncError { provider: Provider::Apple, message: e.to_string() }),
+                            Err(e) => errors.push(SyncError { provider: Provider::Apple, message: format!("同步任务失败：{e}") }),
                         }
                     }
                     calendars.extend(cals);
@@ -133,7 +133,7 @@ async fn do_sync(app: &AppHandle, range_start: NaiveDate, range_end: NaiveDate) 
                     events.extend(evs);
                 }
                 Ok(Err(e)) => errors.push(SyncError { provider: Provider::Ics, message: e }),
-                Err(e) => errors.push(SyncError { provider: Provider::Ics, message: e.to_string() }),
+                Err(e) => errors.push(SyncError { provider: Provider::Ics, message: format!("同步任务失败：{e}") }),
             }
         }
     }

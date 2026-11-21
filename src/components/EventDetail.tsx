@@ -60,7 +60,7 @@ export default function EventDetail({ ev, calendar, color, anchor, onClose, onEd
     try {
       const updated = await respondEvent(ev.calendarId, ev.remoteId, status);
       onResponded(updated);
-      setNotice(`참석 여부를 변경했습니다: ${RESPONSE_LABEL[status]}`);
+      setNotice(`已将出席状态更新为「${RESPONSE_LABEL[status]}」。`);
     } catch (e) {
       setError(String(e));
     } finally {
@@ -72,18 +72,18 @@ export default function EventDetail({ ev, calendar, color, anchor, onClose, onEd
   const readOnlyNote = ev.editable
     ? null
     : calendar && !calendar.canEdit
-      ? "읽기 전용 캘린더"
+      ? "只读日历"
       : calendar?.provider === "apple"
-        ? "반복 일정은 iCloud에서 수정하세요"
+        ? "请在 iCloud 中修改重复日程"
         : ev.canRespond
-          ? "일정 내용은 주최자만 수정할 수 있습니다"
-          : "수정할 수 없는 일정";
+          ? "只有组织者可以修改日程内容"
+          : "此日程无法编辑";
   return (
     <Popover anchor={anchor} onClose={onClose} width={380} className="detail">
       <div className="detail-head">
         <span className="detail-swatch" style={{ background: bg }} />
         <div className="detail-title">{ev.title}</div>
-        <button type="button" className="btn btn-icon btn-close" onClick={onClose} aria-label="닫기">
+        <button type="button" className="btn btn-icon btn-close" onClick={onClose} aria-label="关闭">
           ×
         </button>
       </div>
@@ -98,9 +98,9 @@ export default function EventDetail({ ev, calendar, color, anchor, onClose, onEd
         {ev.location && <div className="detail-row">📍 {ev.location}</div>}
         {ev.organizer && (
           <div className="detail-row detail-organizer">
-            <span className="detail-muted">주최자</span>
+            <span className="detail-muted">组织者</span>
             <span title={ev.organizer.email ?? undefined}>
-              {ev.organizer.displayName || ev.organizer.email || "이름 없는 주최자"}
+              {ev.organizer.displayName || ev.organizer.email || "未命名的组织者"}
               {ev.organizer.displayName && ev.organizer.email && (
                 <span className="detail-person-email">{ev.organizer.email}</span>
               )}
@@ -108,13 +108,13 @@ export default function EventDetail({ ev, calendar, color, anchor, onClose, onEd
           </div>
         )}
         {(attendees.length > 0 || ev.attendeesOmitted) && (
-          <section className="detail-guests" aria-label="참석자">
+          <section className="detail-guests" aria-label="参与者">
             <div className="detail-guests-title">
-              {ev.attendeesOmitted ? "공개된 참석자" : "참석자"} {attendees.length}명
+              {ev.attendeesOmitted ? "公开的参与者" : "参与者"} {attendees.length} 人
             </div>
             <div className="detail-guest-summary">
               {(Object.keys(counts) as ResponseStatus[]).filter((s) => counts[s] > 0)
-                .map((s) => `${RESPONSE_LABEL[s]} ${counts[s]}명`).join(" · ")}
+                .map((s) => `${RESPONSE_LABEL[s]} ${counts[s]} 人`).join(" · ")}
             </div>
             <ul className="detail-guest-list">
               {attendees.map((a, i) => (
@@ -123,11 +123,15 @@ export default function EventDetail({ ev, calendar, color, anchor, onClose, onEd
                     {RESPONSE_ICON[a.responseStatus]}
                   </span>
                   <div className="detail-person">
-                    <div className="detail-person-name">{a.displayName || a.email || "이름 없는 참석자"}</div>
+                    <div className="detail-person-name">{a.displayName || a.email || "未命名的参与者"}</div>
                     {a.displayName && a.email && <div className="detail-person-email">{a.email}</div>}
                     {(a.organizer || a.isSelf || a.optional) && (
                       <div className="detail-person-email">
-                        {[a.organizer && "주최자", a.isSelf && (a.email?.toLowerCase() === calendar?.account.toLowerCase() ? "나" : "응답 대상"), a.optional && "선택 참석"].filter(Boolean).join(" · ")}
+                        {[
+                          a.organizer && "组织者",
+                          a.isSelf && (a.email?.toLowerCase() === calendar?.account.toLowerCase() ? "我" : "回复身份"),
+                          a.optional && "可选参加",
+                        ].filter(Boolean).join(" · ")}
                       </div>
                     )}
                   </div>
@@ -135,7 +139,7 @@ export default function EventDetail({ ev, calendar, color, anchor, onClose, onEd
                 </li>
               ))}
             </ul>
-            {ev.attendeesOmitted && <p className="detail-guest-summary">Google에서 공개한 참석자만 표시됩니다.</p>}
+            {ev.attendeesOmitted && <p className="detail-guest-summary">仅显示 Google 公开的参与者。</p>}
           </section>
         )}
         {ev.description && (
@@ -147,13 +151,13 @@ export default function EventDetail({ ev, calendar, color, anchor, onClose, onEd
       {ev.responseStatus && (
         <div className="detail-rsvp" aria-busy={saving}>
           <div className="detail-rsvp-heading">
-            <span>참석 여부</span>
+            <span>出席状态</span>
             <span className="detail-muted">{RESPONSE_LABEL[ev.responseStatus]}</span>
           </div>
           {ev.canRespond && <>
             {ownAttendee?.email && <div className="detail-person-email">{ownAttendee.email}</div>}
-            {ev.recurring && <div className="detail-guest-summary">반복 일정의 이 날짜에만 적용됩니다.</div>}
-            <div className="detail-rsvp-buttons" role="group" aria-label="참석 여부 선택">
+            {ev.recurring && <div className="detail-guest-summary">此回复仅适用于当天的日程。</div>}
+            <div className="detail-rsvp-buttons" role="group" aria-label="选择出席状态">
               {(["accepted", "declined", "tentative"] as const).map((status) => (
                 <button type="button" key={status}
                   className={`btn btn-sm ${ev.responseStatus === status ? "btn-primary" : "btn-outline"}`}
@@ -165,14 +169,14 @@ export default function EventDetail({ ev, calendar, color, anchor, onClose, onEd
               ))}
             </div>
           </>}
-          <div className="detail-rsvp-notice" role="status">{saving ? "응답을 보내는 중…" : notice}</div>
+          <div className="detail-rsvp-notice" role="status">{saving ? "正在发送回复…" : notice}</div>
           {error && <div className="detail-rsvp-error" role="alert">{error}</div>}
         </div>
       )}
       <div className="detail-actions">
         {ev.editable && onEdit ? (
           <button type="button" className="btn btn-outline btn-sm" onClick={onEdit}>
-            수정
+            编辑
           </button>
         ) : (
           readOnlyNote && <span className="detail-readonly">🔒 {readOnlyNote}</span>
@@ -180,7 +184,7 @@ export default function EventDetail({ ev, calendar, color, anchor, onClose, onEd
         <span className="editor-spacer" />
         {ev.htmlLink && (
           <button type="button" className="btn btn-link" onClick={() => openUrl(ev.htmlLink!)}>
-            웹에서 열기 ↗
+            在网页中打开 ↗
           </button>
         )}
       </div>

@@ -47,7 +47,7 @@ if (!("__TAURI_INTERNALS__" in window)) {
   }
 }
 
-// Browser-only: ?resync=N clicks the 동기화 button N times and reports whether chip DOM nodes
+// Browser-only: ?resync=N clicks the sync button N times and reports whether chip DOM nodes
 // kept their identity (no re-mount) and whether the grid's layout box moved.
 if (!("__TAURI_INTERNALS__" in window)) {
   const n = Number(new URLSearchParams(location.search).get("resync") ?? 0);
@@ -63,7 +63,7 @@ if (!("__TAURI_INTERNALS__" in window)) {
       const ro = new ResizeObserver(() => shifts++);
       chips.forEach((c) => ro.observe(c));
       for (let i = 0; i < n; i++) {
-        (document.querySelector<HTMLButtonElement>('[aria-label="동기화"]') ?? { click() {} }).click();
+        (document.querySelector<HTMLButtonElement>('[aria-label="同步"]') ?? { click() {} }).click();
         await sleep(400);
       }
       await sleep(500);
@@ -107,7 +107,7 @@ if (import.meta.env.DEV && PERF && !("__TAURI_INTERNALS__" in window)) {
     };
 
     lines.push(`initial: ${fmt(perfSnapshot())}`);
-    await step("sync-unchanged", () => click('[aria-label="동기화"]'));
+    await step("sync-unchanged", () => click('[aria-label="同步"]'));
     await step("sync-changed", async () => {
       const { mock } = await import("./lib/mock");
       const r = await mock.getCached();
@@ -121,10 +121,10 @@ if (import.meta.env.DEV && PERF && !("__TAURI_INTERNALS__" in window)) {
           allDay: ev.allDay,
           reminders: ev.reminders,
         });
-      click('[aria-label="동기화"]');
+      click('[aria-label="同步"]');
     });
-    await step("nav-next", () => click('[aria-label="다음 달"]'));
-    await step("nav-prev", () => click('[aria-label="이전 달"]'));
+    await step("nav-next", () => click('[aria-label="下个月"]'));
+    await step("nav-prev", () => click('[aria-label="上个月"]'));
     await step("popover-open", () => click(".chip"));
     await step("popover-close", () => {
       document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
@@ -136,20 +136,20 @@ if (import.meta.env.DEV && PERF && !("__TAURI_INTERNALS__" in window)) {
         c.dispatchEvent(new MouseEvent("mouseout", { bubbles: true }));
       });
     });
-    await step("settings-open", () => click('[aria-label="설정"]'));
+    await step("settings-open", () => click('[aria-label="设置"]'));
     await step("settings-type-5", async () => {
-      tab("계정");
+      tab("账号");
       await sleep(100);
       const input = q<HTMLInputElement>('input[type="email"]');
       if (input) for (const v of ["a", "ab", "abc", "abcd", "abcde"]) setNative(input, v);
     });
     await step("calendar-toggle", async () => {
-      tab("캘린더");
+      tab("日历");
       await sleep(100);
       q<HTMLInputElement>(".calrow .bell")?.click();
     });
     await step("opacity-slider-5", async () => {
-      tab("표시");
+      tab("显示");
       await sleep(100);
       const range = q<HTMLInputElement>('input[type="range"]');
       if (range) for (const v of ["0.9", "0.85", "0.8", "0.75", "0.7"]) setNative(range, v);

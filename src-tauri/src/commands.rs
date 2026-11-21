@@ -77,7 +77,7 @@ fn accounts_of(state: &AppState) -> Vec<AccountInfo> {
     out.push(AccountInfo {
         provider: Provider::Ics,
         id: "ics".into(),
-        label: if a.ics_feeds.is_empty() { String::new() } else { format!("{}개 구독", a.ics_feeds.len()) },
+        label: if a.ics_feeds.is_empty() { String::new() } else { format!("{} 个订阅", a.ics_feeds.len()) },
         connected: !a.ics_feeds.is_empty(),
     });
     out
@@ -94,20 +94,20 @@ fn split_calendar_id(calendar_id: &str) -> Result<(Provider, String, String), St
     if let Some(rest) = calendar_id.strip_prefix("google:") {
         let (account, cal) = rest
             .split_once(':')
-            .ok_or_else(|| "이전 버전의 캘린더 ID입니다. 동기화 후 다시 시도해 주세요.".to_string())?;
+            .ok_or_else(|| "这是旧版日历 ID，请同步后重试。".to_string())?;
         Ok((Provider::Google, account.to_string(), cal.to_string()))
     } else if let Some(rest) = calendar_id.strip_prefix("apple:") {
         Ok((Provider::Apple, "apple".to_string(), rest.to_string()))
     } else if calendar_id.starts_with("ics:") {
-        Err("iCal 구독 캘린더는 읽기 전용입니다.".into())
+        Err("iCal 订阅日历为只读。".into())
     } else {
-        Err(format!("알 수 없는 캘린더: {calendar_id}"))
+        Err(format!("未知日历：{calendar_id}"))
     }
 }
 
 async fn google_access_token(state: &AppState, account_id: &str) -> Result<String, String> {
     let refresh = store::get_secret(&store::google_secret_key(account_id))
-        .ok_or("이 Google 계정의 로그인 정보가 없습니다. 설정에서 다시 로그인해 주세요.")?;
+        .ok_or("找不到此 Google 账号的登录信息，请在设置中重新登录。")?;
     let s = state.settings();
     crate::sync::google_token(state, &state.http, &s.google.client_id, &s.google.client_secret, account_id, &refresh)
         .await
@@ -115,25 +115,25 @@ async fn google_access_token(state: &AppState, account_id: &str) -> Result<Strin
 
 fn apple_creds(state: &AppState) -> Result<AppleCreds, String> {
     let a = state.accounts();
-    let apple_id = a.apple_id.ok_or("iCloud 계정이 연결되어 있지 않습니다.")?;
-    let password = store::get_secret(store::SECRET_APPLE_PASSWORD).ok_or("iCloud 앱 암호를 찾을 수 없습니다.")?;
+    let apple_id = a.apple_id.ok_or("尚未连接 iCloud 账号。")?;
+    let password = store::get_secret(store::SECRET_APPLE_PASSWORD).ok_or("找不到 iCloud 的 App 专用密码。")?;
     Ok(AppleCreds { apple_id, password })
 }
 
 fn validate_input(input: &EventInput) -> Result<(), String> {
     if input.title.trim().is_empty() {
-        return Err("제목을 입력해 주세요.".into());
+        return Err("请输入标题。".into());
     }
     let s = crate::vevent::parse_input_when(&input.start, input.all_day)?;
     let e = crate::vevent::parse_input_when(&input.end, input.all_day)?;
     if crate::vevent::when_diff_secs(&s, &e) <= 0 {
-        return Err("종료 시각은 시작 시각 이후여야 합니다.".into());
+        return Err("结束时间必须晚于开始时间。".into());
     }
     Ok(())
 }
 
 fn parse_date(s: &str) -> Result<NaiveDate, String> {
-    NaiveDate::parse_from_str(s, "%Y-%m-%d").map_err(|e| format!("잘못된 날짜 '{s}': {e}"))
+    NaiveDate::parse_from_str(s, "%Y-%m-%d").map_err(|e| format!("无效日期「{s}」：{e}"))
 }
 
 // ── commands ──
@@ -182,7 +182,7 @@ pub async fn connect_google(app: AppHandle, state: State<'_, AppState>) -> Resul
             opener
                 .opener()
                 .open_url(url, None::<&str>)
-                .map_err(|e| format!("브라우저 열기 실패: {e}"))
+                .map_err(|e| format!("无法打开浏览器：{e}"))
         },
     )
     .await;
@@ -251,7 +251,7 @@ pub async fn connect_apple(
     let apple_id = apple_id.trim().to_string();
     let password = app_password.trim().replace('-', "").replace(' ', "");
     if apple_id.is_empty() || password.is_empty() {
-        return Err("Apple ID와 앱 암호를 모두 입력해 주세요.".into());
+        return Err("请输入 Apple ID 和 App 专用密码。".into());
     }
     let creds = AppleCreds { apple_id: apple_id.clone(), password: password.clone() };
     let home = apple::discover_home(&state.http, &creds).await?;
@@ -287,7 +287,7 @@ pub async fn sync_now(app: AppHandle, range_start: String, range_end: String) ->
     let s = parse_date(&range_start)?;
     let e = parse_date(&range_end)?;
     if e <= s {
-        return Err("종료일이 시작일보다 앞섭니다.".into());
+        return Err("结束日期必须晚于开始日期。".into());
     }
     Ok(crate::sync::sync_range(&app, s, e).await)
 }
@@ -301,7 +301,7 @@ pub fn set_window_mode(app: AppHandle, mode: WindowMode) -> Result<(), String> {
 #[tauri::command]
 pub fn hide_window(app: AppHandle) -> Result<(), String> {
     if let Some(w) = app.get_webview_window("main") {
-        w.hide().map_err(|e| e.to_string())?;
+        w.hide().map_err(|e| format!("无法隐藏窗口：{e}"))?;
     }
     Ok(())
 }
@@ -317,12 +317,12 @@ pub async fn respond_event(
 ) -> Result<CalEvent, String> {
     let (provider, account, _) = split_calendar_id(&calendar_id)?;
     if provider != Provider::Google {
-        return Err("초대 응답은 Google로 로그인한 캘린더에서 지원합니다.".into());
+        return Err("只能回复已连接 Google 账号的日历里的邀请。".into());
     }
     let _guard = state.sync_lock.lock().await;
     let cal = state.cache.lock().unwrap().calendars.iter()
         .find(|c| c.id == calendar_id).cloned()
-        .ok_or("캘린더를 찾을 수 없습니다. 동기화 후 다시 시도해 주세요.")?;
+        .ok_or("找不到日历，请同步后重试。")?;
     let token = google_access_token(&state, &account).await?;
     let updated = google::respond_event(&state.http, &token, &cal, &remote_id, response_status).await?;
     let mut cache = state.cache.lock().unwrap().clone();
@@ -372,7 +372,7 @@ pub async fn update_event(
 ) -> Result<SyncResult, String> {
     validate_input(&input)?;
     if input.calendar_id != calendar_id {
-        return Err("일정을 다른 캘린더로 옮기는 기능은 아직 지원하지 않습니다.".into());
+        return Err("目前无法将日程移到其他日历。".into());
     }
     let (provider, account, remote_cal) = split_calendar_id(&calendar_id)?;
     match provider {
@@ -424,12 +424,12 @@ pub async fn add_ics_feed(state: State<'_, AppState>, name: String, url: String)
     let (cal_name, cal_color) = feed::probe(&state.http, &url).await?;
     let mut a = state.accounts();
     if a.ics_feeds.iter().any(|f| f.url == url) {
-        return Err("이미 추가된 피드입니다.".into());
+        return Err("已添加此订阅。".into());
     }
     let id = format!("{:x}", chrono::Utc::now().timestamp_millis());
     let feed = IcsFeed {
         id,
-        name: if name.trim().is_empty() { cal_name.unwrap_or_else(|| "iCal 구독".into()) } else { name.trim().to_string() },
+        name: if name.trim().is_empty() { cal_name.unwrap_or_else(|| "iCal 订阅".into()) } else { name.trim().to_string() },
         url,
         color: cal_color.unwrap_or_default(),
     };
@@ -454,7 +454,7 @@ pub fn remove_ics_feed(state: State<'_, AppState>, id: String) -> Result<(), Str
 #[tauri::command]
 pub fn open_external(app: AppHandle, url: String) -> Result<(), String> {
     if !(url.starts_with("https://") || url.starts_with("http://")) {
-        return Err("http(s) URL만 열 수 있습니다.".into());
+        return Err("仅支持打开 HTTP 或 HTTPS 链接。".into());
     }
-    app.opener().open_url(url, None::<&str>).map_err(|e| e.to_string())
+    app.opener().open_url(url, None::<&str>).map_err(|e| format!("无法打开链接：{e}"))
 }

@@ -25,13 +25,15 @@ export const getAccounts = () =>
  */
 export const connectGoogle = () =>
   isTauri ? invoke<AccountInfo>("connect_google") : mock.connectGoogle();
-/** Aborts a pending `connectGoogle()` (the browser tab was closed, etc.). The pending promise rejects with "로그인이 취소되었습니다." */
+/** The cancellation message returned by the Google login command. */
+export const GOOGLE_LOGIN_CANCELLED = "登录已取消。";
+/** Aborts a pending `connectGoogle()`, e.g. after the browser tab was closed. */
 export const cancelGoogleLogin = () =>
   isTauri ? invoke<void>("cancel_google_login") : Promise.resolve();
 /** Unlinks one Google account by `AccountInfo.id`. */
 export const disconnectGoogle = (accountId: string) =>
   isTauri ? invoke<void>("disconnect_google", { accountId }) : mock.disconnectGoogle(accountId);
-/** iCloud CalDAV with Apple ID + app-specific password (https://appleid.apple.com → 앱 암호). */
+/** iCloud CalDAV with Apple ID and an app-specific password. */
 export const connectApple = (appleId: string, appPassword: string) =>
   isTauri
     ? invoke<AccountInfo>("connect_apple", { appleId, appPassword })

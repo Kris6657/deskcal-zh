@@ -344,9 +344,9 @@ export default function App() {
       void import("./lib/api").then(async (api) => {
         let r: SyncResult | null = null;
         if (scenario === "create" && cal)
-          r = await api.createEvent({ calendarId: cal.id, title: "✅ 테스트 일정", start: s.toISOString(), end: e.toISOString(), allDay: false, reminders: [10] });
+          r = await api.createEvent({ calendarId: cal.id, title: "✅ 测试日程", start: s.toISOString(), end: e.toISOString(), allDay: false, reminders: [10] });
         if (scenario === "edit" && ev)
-          r = await api.updateEvent(ev.calendarId, ev.remoteId, { calendarId: ev.calendarId, title: "✏️ 수정됨", start: ev.start, end: ev.end, allDay: ev.allDay, reminders: [] });
+          r = await api.updateEvent(ev.calendarId, ev.remoteId, { calendarId: ev.calendarId, title: "✏️ 已修改", start: ev.start, end: ev.end, allDay: ev.allDay, reminders: [] });
         if (scenario === "delete" && ev) r = await api.deleteEvent(ev.calendarId, ev.remoteId);
         if (r) applyResult(r, null);
       });
@@ -427,10 +427,10 @@ export default function App() {
           <div className="empty">
             <div className="empty-card">
               <div className="empty-icon">📅</div>
-              <div className="empty-title">계정을 연결해 일정을 불러오세요</div>
-              <div className="empty-desc">Google 캘린더 또는 iCloud 캘린더를 연결할 수 있습니다.</div>
+              <div className="empty-title">连接账号以加载日程</div>
+              <div className="empty-desc">可以连接 Google 日历或 iCloud 日历。</div>
               <button type="button" className="btn btn-primary" onClick={() => setSettingsOpen(true)}>
-                계정 연결
+                连接账号
               </button>
             </div>
           </div>

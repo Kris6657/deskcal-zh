@@ -36,7 +36,7 @@ async fn dav(
         .body(body.to_string())
         .send()
         .await
-        .map_err(|e| format!("iCloud 연결 실패: {e}"))?;
+        .map_err(|e| format!("连接 iCloud 失败：{e}"))?;
     let status = resp.status();
     let text = resp.text().await.unwrap_or_default();
     Ok((status, text))
@@ -66,7 +66,7 @@ fn find_href_in<'a>(node: roxmltree::Node<'a, 'a>, local: &str) -> Option<String
 fn check_auth(status: reqwest::StatusCode) -> Result<(), String> {
     if status == reqwest::StatusCode::UNAUTHORIZED || status == reqwest::StatusCode::FORBIDDEN {
         return Err(
-            "iCloud 인증 실패: Apple ID 또는 앱 암호를 확인해 주세요. (appleid.apple.com > 로그인 및 보안 > 앱 암호)".into(),
+            "iCloud 验证失败。请检查 Apple ID 和 App 专用密码。可在 appleid.apple.com 的「登录与安全」中管理 App 专用密码。".into(),
         );
     }
     Ok(())
@@ -77,17 +77,17 @@ pub async fn discover_home(http: &reqwest::Client, creds: &AppleCreds) -> Result
     let body = r#"<?xml version="1.0" encoding="utf-8"?><d:propfind xmlns:d="DAV:"><d:prop><d:current-user-principal/></d:prop></d:propfind>"#;
     let (status, text) = dav(http, creds, "PROPFIND", DISCOVERY_URL, "0", body).await?;
     check_auth(status)?;
-    let doc = roxmltree::Document::parse(&text).map_err(|e| format!("iCloud 응답 파싱 실패: {e}"))?;
+    let doc = roxmltree::Document::parse(&text).map_err(|e| format!("无法解析 iCloud 响应：{e}"))?;
     let principal = find_href_in(doc.root(), "current-user-principal")
-        .ok_or_else(|| format!("principal을 찾을 수 없습니다 ({status})"))?;
+        .ok_or_else(|| format!("找不到 iCloud 账号标识（principal，{status}）"))?;
     let principal_url = resolve(DISCOVERY_URL, &principal);
 
     let body = r#"<?xml version="1.0" encoding="utf-8"?><d:propfind xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav"><d:prop><c:calendar-home-set/></d:prop></d:propfind>"#;
     let (status, text) = dav(http, creds, "PROPFIND", &principal_url, "0", body).await?;
     check_auth(status)?;
-    let doc = roxmltree::Document::parse(&text).map_err(|e| format!("iCloud 응답 파싱 실패: {e}"))?;
+    let doc = roxmltree::Document::parse(&text).map_err(|e| format!("无法解析 iCloud 响应：{e}"))?;
     let home = find_href_in(doc.root(), "calendar-home-set")
-        .ok_or_else(|| format!("calendar-home-set을 찾을 수 없습니다 ({status})"))?;
+        .ok_or_else(|| format!("找不到 iCloud 日历目录（calendar-home-set，{status}）"))?;
     Ok(resolve(&principal_url, &home))
 }
 
@@ -103,7 +103,7 @@ pub async fn list_calendars(
     let body = r#"<?xml version="1.0" encoding="utf-8"?><d:propfind xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav" xmlns:a="http://apple.com/ns/ical/"><d:prop><d:displayname/><d:resourcetype/><a:calendar-color/><c:supported-calendar-component-set/><d:current-user-privilege-set/></d:prop></d:propfind>"#;
     let (status, text) = dav(http, creds, "PROPFIND", home_url, "1", body).await?;
     check_auth(status)?;
-    let doc = roxmltree::Document::parse(&text).map_err(|e| format!("iCloud 응답 파싱 실패: {e}"))?;
+    let doc = roxmltree::Document::parse(&text).map_err(|e| format!("无法解析 iCloud 响应：{e}"))?;
     let mut out = Vec::new();
     for resp in doc
         .descendants()
@@ -141,7 +141,7 @@ pub async fn list_calendars(
                 continue;
             }
         }
-        let name = find_text(resp, "displayname").unwrap_or_else(|| "캘린더".into());
+        let name = find_text(resp, "displayname").unwrap_or_else(|| "日历".into());
         let color = find_text(resp, "calendar-color")
             .map(|c| if c.len() >= 7 { c[..7].to_string() } else { c })
             .unwrap_or_else(|| "#ff9500".into());
@@ -209,9 +209,9 @@ pub async fn list_events(
         expanded = false;
     }
     if !status.is_success() {
-        return Err(format!("'{}' 일정 조회 실패 ({status})", cal.name));
+        return Err(format!("获取「{}」的日程失败（{status}）", cal.name));
     }
-    let doc = roxmltree::Document::parse(&text).map_err(|e| format!("iCloud 응답 파싱 실패: {e}"))?;
+    let doc = roxmltree::Document::parse(&text).map_err(|e| format!("无法解析 iCloud 响应：{e}"))?;
     let mut out = Vec::new();
     for resp in doc
         .descendants()
@@ -264,13 +264,13 @@ async fn put_ics(
     if create {
         req = req.header("If-None-Match", "*");
     }
-    let resp = req.body(body).send().await.map_err(|e| format!("iCloud 연결 실패: {e}"))?;
+    let resp = req.body(body).send().await.map_err(|e| format!("连接 iCloud 失败：{e}"))?;
     let status = resp.status();
     check_auth(status)?;
     if !status.is_success() {
         let text = resp.text().await.unwrap_or_default();
         log::warn!("caldav PUT {href} -> {status}: {text}");
-        return Err(format!("iCloud 저장 실패 ({status})"));
+        return Err(format!("保存 iCloud 日程失败（{status}）"));
     }
     Ok(())
 }
@@ -302,13 +302,13 @@ pub async fn update_event(
         .header("User-Agent", "DeskCal/0.1")
         .send()
         .await
-        .map_err(|e| format!("iCloud 연결 실패: {e}"))?;
+        .map_err(|e| format!("连接 iCloud 失败：{e}"))?;
     let status = resp.status();
     check_auth(status)?;
     if !status.is_success() {
-        return Err(format!("iCloud 일정 조회 실패 ({status})"));
+        return Err(format!("获取 iCloud 日程失败（{status}）"));
     }
-    let existing = resp.text().await.map_err(|e| e.to_string())?;
+    let existing = resp.text().await.map_err(|e| format!("无法读取 iCloud 日程：{e}"))?;
     let body = vevent::build_ics("", input, Some(&existing))?;
     put_ics(http, creds, href, body, false).await
 }
@@ -320,11 +320,11 @@ pub async fn delete_event(http: &reqwest::Client, creds: &AppleCreds, href: &str
         .header("User-Agent", "DeskCal/0.1")
         .send()
         .await
-        .map_err(|e| format!("iCloud 연결 실패: {e}"))?;
+        .map_err(|e| format!("连接 iCloud 失败：{e}"))?;
     let status = resp.status();
     check_auth(status)?;
     if !status.is_success() && status != reqwest::StatusCode::NOT_FOUND {
-        return Err(format!("iCloud 삭제 실패 ({status})"));
+        return Err(format!("删除 iCloud 日程失败（{status}）"));
     }
     Ok(())
 }

@@ -152,7 +152,7 @@ const WeekRow = memo(function WeekRow({ days, viewMonth, todayKey, events, calen
         const inMonth = d.getMonth() === viewMonth.getMonth();
         const isToday = dayKey(d) === todayKey;
         const dow = d.getDay();
-        const label = d.getDate() === 1 ? `${d.getMonth() + 1}월 1일` : String(d.getDate());
+        const label = d.getDate() === 1 ? `${d.getMonth() + 1}月1日` : String(d.getDate());
         return (
           <div
             key={c}
@@ -161,13 +161,13 @@ const WeekRow = memo(function WeekRow({ days, viewMonth, todayKey, events, calen
             onDoubleClick={(e) => {
               if (e.target === e.currentTarget) onDayDoubleClick?.(d);
             }}
-            title={onDayDoubleClick ? "더블클릭: 일정 추가" : undefined}
+            title={onDayDoubleClick ? "双击新建日程" : undefined}
           >
             <button
               type="button"
               className={`daynum${isToday ? " today" : ""}${dow === 0 ? " sun" : dow === 6 ? " sat" : ""}${d.getDate() === 1 ? " first" : ""}`}
               onClick={(e) => onMoreClick(d, e)}
-              title="이 날의 일정 보기"
+              title="查看当天日程"
             >
               {label}
             </button>
@@ -199,7 +199,7 @@ const WeekRow = memo(function WeekRow({ days, viewMonth, todayKey, events, calen
         n > 0 ? (
           <div key={`more-${c}`} className="chip-cell" style={{ gridColumn: c + 1, gridRow: layout.limit[c] + 2 }}>
             <button type="button" className="more" onClick={(e) => onMoreClick(days[c], e)}>
-              {n}개 더보기
+              还有 {n} 项
             </button>
           </div>
         ) : null,

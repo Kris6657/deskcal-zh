@@ -24,13 +24,13 @@ impl TrayItems {
 pub fn setup(app: &AppHandle) -> tauri::Result<()> {
     let mode = app.state::<AppState>().settings().window_mode;
 
-    let toggle = MenuItem::with_id(app, "toggle", "열기 / 숨기기", true, None::<&str>)?;
-    let floating = CheckMenuItem::with_id(app, "mode_floating", "일반 창", true, mode == WindowMode::Floating, None::<&str>)?;
-    let desktop = CheckMenuItem::with_id(app, "mode_desktop", "바탕화면 위젯 (아이콘 위)", true, mode == WindowMode::Desktop, None::<&str>)?;
-    let wallpaper = CheckMenuItem::with_id(app, "mode_wallpaper", "배경화면 (아이콘 뒤, 보기 전용)", true, mode == WindowMode::Wallpaper, None::<&str>)?;
-    let sync_item = MenuItem::with_id(app, "sync", "지금 동기화", true, None::<&str>)?;
-    let settings = MenuItem::with_id(app, "settings", "설정…", true, None::<&str>)?;
-    let quit = MenuItem::with_id(app, "quit", "종료", true, None::<&str>)?;
+    let toggle = MenuItem::with_id(app, "toggle", "显示或隐藏", true, None::<&str>)?;
+    let floating = CheckMenuItem::with_id(app, "mode_floating", "普通窗口", true, mode == WindowMode::Floating, None::<&str>)?;
+    let desktop = CheckMenuItem::with_id(app, "mode_desktop", "桌面小组件（图标上方）", true, mode == WindowMode::Desktop, None::<&str>)?;
+    let wallpaper = CheckMenuItem::with_id(app, "mode_wallpaper", "桌面背景（图标下方，仅供查看）", true, mode == WindowMode::Wallpaper, None::<&str>)?;
+    let sync_item = MenuItem::with_id(app, "sync", "立即同步", true, None::<&str>)?;
+    let settings = MenuItem::with_id(app, "settings", "设置…", true, None::<&str>)?;
+    let quit = MenuItem::with_id(app, "quit", "退出", true, None::<&str>)?;
 
     let menu = Menu::with_items(
         app,
@@ -53,7 +53,7 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
     let icon = app.default_window_icon().cloned().expect("default icon");
     TrayIconBuilder::with_id("main")
         .icon(icon)
-        .tooltip("DeskCal")
+        .tooltip("DeskCal 中文版")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id().as_ref() {

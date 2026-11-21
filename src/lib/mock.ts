@@ -50,15 +50,15 @@ const gcal = (
 });
 
 const calendarsA: CalendarInfo[] = [
-  gcal(ACCT_A, "me", "내 캘린더", "#4285f4", true, true),
-  gcal(ACCT_A, "tasks", "Tasks", "#4285f4", true, true),
-  gcal(ACCT_A, "bday", "생일", "#0b8043", true, false),
+  gcal(ACCT_A, "me", "我的日历", "#4285f4", true, true),
+  gcal(ACCT_A, "tasks", "待办事项", "#4285f4", true, true),
+  gcal(ACCT_A, "bday", "生日", "#0b8043", true, false),
   gcal(ACCT_A, "michelo", "Michelo Robotics", "#e67c73", false, true),
-  gcal(ACCT_A, "ko.south_korea#holiday", "대한민국의 휴일", "#0b8043", false, false, true),
+  gcal(ACCT_A, "ko.south_korea#holiday", "韩国节假日", "#0b8043", false, false, true),
 ];
 const calendarsB: CalendarInfo[] = [
-  gcal(ACCT_B, "work", "업무", "#8e24aa", true, true),
-  gcal(ACCT_B, "team", "팀 공유", "#f6bf26", false, true),
+  gcal(ACCT_B, "work", "工作", "#8e24aa", true, true),
+  gcal(ACCT_B, "team", "团队共享", "#f6bf26", false, true),
 ];
 let calendars: CalendarInfo[] = [...calendarsA, ...calendarsB];
 
@@ -84,59 +84,59 @@ const mk = (calendarId: string, title: string, start: string, end: string, extra
 };
 
 let events: CalEvent[] = [
-  mk("google:a1:me", "[초대] 파트너 미팅", iso(Y, M, 22, 10), iso(Y, M, 22, 11, 30), {
+  mk("google:a1:me", "【邀请】合作伙伴会议", iso(Y, M, 22, 10), iso(Y, M, 22, 11, 30), {
     editable: false,
     canRespond: true,
     responseStatus: "needsAction",
-    organizer: { email: "host@example.com", displayName: "주최자", isSelf: false },
+    organizer: { email: "host@example.com", displayName: "组织者", isSelf: false },
     attendees: [
-      { email: "host@example.com", displayName: "주최자", isSelf: false, organizer: true, optional: false, responseStatus: "accepted" },
-      { email: "colleague@example.com", displayName: "동료", isSelf: false, organizer: false, optional: false, responseStatus: "accepted" },
-      { email: "me@example.com", displayName: "나", isSelf: true, organizer: false, optional: false, responseStatus: "needsAction" },
+      { email: "host@example.com", displayName: "组织者", isSelf: false, organizer: true, optional: false, responseStatus: "accepted" },
+      { email: "colleague@example.com", displayName: "同事", isSelf: false, organizer: false, optional: false, responseStatus: "accepted" },
+      { email: "me@example.com", displayName: "我", isSelf: true, organizer: false, optional: false, responseStatus: "needsAction" },
     ],
-    description: "미팅 아젠다를 함께 확인해 주세요.\n\n1. 진행 상황 공유\n2. 다음 일정 논의",
+    description: "请查看会议议程。\n\n1. 分享当前进展\n2. 讨论后续安排",
   }),
-  mk("google:a1:michelo", "🌴 [최성원] 휴가", day(Y, M, 1), day(Y, M, 2)),
-  mk("google:a1:michelo", "[미켈로] 전월 법인카드 고위드", day(Y, M, 1), day(Y, M, 2)),
-  mk("google:a1:michelo", "[AI사업융합] 협의체 회의", day(Y, M, 2), day(Y, M, 3)),
-  mk("google:a1:michelo", "🌴 [윤여상] 휴가", day(Y, M, 2), day(Y, M, 5)),
-  mk("google:a1:michelo", "🌴 [이건우] 휴가", day(Y, M, 3), day(Y, M, 4)),
-  mk("google:a1:michelo", "🌴 [홍길동] 휴가", day(Y, M, 3), day(Y, M, 4)),
-  mk("google:a1:bday", "🎂 축 정태준 탄신일", day(Y, M, 3), day(Y, M, 4)),
-  mk("google:a1:michelo", "오전 8:30 안영사 출장", day(Y, M, 4), day(Y, M, 6)),
-  mk("google:a1:michelo", "[서울형TIPS] 연구성과 입력", iso(Y, M, 4, 9, 0), iso(Y, M, 4, 10, 0), { location: "회의실 A" }),
-  mk("google:a1:michelo", "위더스21 정비창고 방문", iso(Y, M, 4, 10, 0), iso(Y, M, 4, 11, 30)),
-  mk("google:a1:michelo", "[연구팀] 랩미팅", iso(Y, M, 4, 16, 0), iso(Y, M, 4, 17, 0)),
-  mk("google:a1:michelo", "[UR&성원] 하종원", iso(Y, M, 4, 18, 0), iso(Y, M, 4, 19, 0)),
-  mk("google:a1:me", "핑거 홍승표대표님 미팅", iso(Y, M, 1, 11, 30), iso(Y, M, 1, 12, 30)),
-  mk("google:a1:me", "프론트엔드 팀 미팅", iso(Y, M, 1, 13, 0), iso(Y, M, 1, 14, 0), { description: "주간 진행 상황 공유", htmlLink: "https://calendar.google.com" }),
-  mk("google:a1:me", "프론트엔드 팀 미팅", iso(Y, M, 8, 13, 0), iso(Y, M, 8, 14, 0)),
-  mk("google:a1:me", "프론트엔드 팀 미팅", iso(Y, M, 15, 13, 0), iso(Y, M, 15, 14, 0)),
-  mk("google:a1:me", "[바른창호] 현장", iso(Y, M, 8, 10, 30), iso(Y, M, 8, 12, 0)),
-  mk("google:a1:tasks", "건강검진 예약", iso(Y, M, 8, 9, 0), iso(Y, M, 8, 9, 30)),
-  mk("google:a1:me", "[신동해] 질의 및 답변", iso(Y, M, 9, 14, 45), iso(Y, M, 9, 15, 30)),
-  mk("google:a1:me", "[슈미트] 김현준 미팅", iso(Y, M, 9, 18, 30), iso(Y, M, 9, 19, 30)),
-  mk("google:a1:michelo", "제이코어 출장", day(Y, M, 11), day(Y, M, 12)),
-  mk("google:a1:michelo", "🌴 [문희진] 휴가", day(Y, M, 11), day(Y, M, 13)),
-  mk("google:a1:michelo", "🌴 [남궁민호] 휴가", day(Y, M, 10), day(Y, M, 12)),
-  mk("google:a1:michelo", "[국방벤처]1차 정산 처리", day(Y, M, 14), day(Y, M, 15)),
-  mk("google:a1:michelo", "[박상용] 건강검진", day(Y, M, 14), day(Y, M, 15)),
-  mk("google:a1:michelo", "🌴 [박상용] 휴가", day(Y, M, 14), day(Y, M, 15)),
-  mk("google:a1:michelo", "🌴 [장명근] 휴가", day(Y, M, 14), day(Y, M, 15)),
-  mk("google:a1:michelo", "[AI가상융합] 격주 회의", iso(Y, M, 15, 10, 0), iso(Y, M, 15, 11, 0)),
-  mk("google:a1:michelo", "[경영 지원] 1차 면접", iso(Y, M, 15, 10, 0), iso(Y, M, 15, 12, 0)),
-  mk("google:a1:michelo", "[스톤브릿지] 조현우", iso(Y, M, 15, 18, 0), iso(Y, M, 15, 19, 0)),
-  mk("google:a1:michelo", "[연구팀] 랩미팅", iso(Y, M, 17, 16, 0), iso(Y, M, 17, 17, 0)),
-  mk("google:a1:michelo", "[서울형TIPS]최종보고서 제출", day(Y, M, 18), day(Y, M, 19)),
-  mk("google:a1:ko.south_korea#holiday", "추석 연휴", day(Y, M, 24), day(Y, M, 27)),
-  mk("google:a1:ko.south_korea#holiday", "추석", day(Y, M, 25), day(Y, M, 26)),
-  mk("google:a1:michelo", "[미켈로] 주간 정기", iso(Y, M, 25, 17, 0), iso(Y, M, 25, 18, 0)),
-  mk("google:a1:michelo", "[미켈로] 주간 정기", iso(Y, M, 26, 17, 0), iso(Y, M, 26, 18, 0)),
-  mk("google:a1:ko.south_korea#holiday", "개천절", day(Y, M + 1, 3), day(Y, M + 1, 4)),
-  mk("google:a1:ko.south_korea#holiday", "국군의날", day(Y, M + 1, 1), day(Y, M + 1, 2)),
-  mk("google:b2:work", "주간 업무 보고", iso(Y, M, 2, 9, 30), iso(Y, M, 2, 10, 0)),
-  mk("google:b2:work", "분기 리뷰", iso(Y, M, 16, 14, 0), iso(Y, M, 16, 15, 30), { location: "본사 12층" }),
-  mk("google:b2:team", "팀 워크숍", day(Y, M, 19), day(Y, M, 20)),
+  mk("google:a1:michelo", "🌴 崔成元休假", day(Y, M, 1), day(Y, M, 2)),
+  mk("google:a1:michelo", "【Michelo】核对上月公司卡账单", day(Y, M, 1), day(Y, M, 2)),
+  mk("google:a1:michelo", "【AI 业务融合】协调会议", day(Y, M, 2), day(Y, M, 3)),
+  mk("google:a1:michelo", "🌴 尹汝尚休假", day(Y, M, 2), day(Y, M, 5)),
+  mk("google:a1:michelo", "🌴 李建宇休假", day(Y, M, 3), day(Y, M, 4)),
+  mk("google:a1:michelo", "🌴 洪吉童休假", day(Y, M, 3), day(Y, M, 4)),
+  mk("google:a1:bday", "🎂 郑泰俊的生日", day(Y, M, 3), day(Y, M, 4)),
+  mk("google:a1:michelo", "上午 8:30 安荣士出差", day(Y, M, 4), day(Y, M, 6)),
+  mk("google:a1:michelo", "【首尔 TIPS】录入研究成果", iso(Y, M, 4, 9, 0), iso(Y, M, 4, 10, 0), { location: "会议室 A" }),
+  mk("google:a1:michelo", "参观 Withus 21 维修仓库", iso(Y, M, 4, 10, 0), iso(Y, M, 4, 11, 30)),
+  mk("google:a1:michelo", "【研究组】例会", iso(Y, M, 4, 16, 0), iso(Y, M, 4, 17, 0)),
+  mk("google:a1:michelo", "【UR 与成元】会见河宗元", iso(Y, M, 4, 18, 0), iso(Y, M, 4, 19, 0)),
+  mk("google:a1:me", "与 Finger 公司负责人洪承杓会面", iso(Y, M, 1, 11, 30), iso(Y, M, 1, 12, 30)),
+  mk("google:a1:me", "前端团队会议", iso(Y, M, 1, 13, 0), iso(Y, M, 1, 14, 0), { description: "分享本周进展", htmlLink: "https://calendar.google.com" }),
+  mk("google:a1:me", "前端团队会议", iso(Y, M, 8, 13, 0), iso(Y, M, 8, 14, 0)),
+  mk("google:a1:me", "前端团队会议", iso(Y, M, 15, 13, 0), iso(Y, M, 15, 14, 0)),
+  mk("google:a1:me", "【门窗项目】现场走访", iso(Y, M, 8, 10, 30), iso(Y, M, 8, 12, 0)),
+  mk("google:a1:tasks", "体检预约", iso(Y, M, 8, 9, 0), iso(Y, M, 8, 9, 30)),
+  mk("google:a1:me", "【新东海】问答会", iso(Y, M, 9, 14, 45), iso(Y, M, 9, 15, 30)),
+  mk("google:a1:me", "【施密特】与金贤俊会面", iso(Y, M, 9, 18, 30), iso(Y, M, 9, 19, 30)),
+  mk("google:a1:michelo", "JCore 出差", day(Y, M, 11), day(Y, M, 12)),
+  mk("google:a1:michelo", "🌴 文希珍休假", day(Y, M, 11), day(Y, M, 13)),
+  mk("google:a1:michelo", "🌴 南宫旻浩休假", day(Y, M, 10), day(Y, M, 12)),
+  mk("google:a1:michelo", "【国防创业项目】第一阶段结算", day(Y, M, 14), day(Y, M, 15)),
+  mk("google:a1:michelo", "朴相勇体检", day(Y, M, 14), day(Y, M, 15)),
+  mk("google:a1:michelo", "🌴 朴相勇休假", day(Y, M, 14), day(Y, M, 15)),
+  mk("google:a1:michelo", "🌴 张明根休假", day(Y, M, 14), day(Y, M, 15)),
+  mk("google:a1:michelo", "【AI 虚拟融合】双周会议", iso(Y, M, 15, 10, 0), iso(Y, M, 15, 11, 0)),
+  mk("google:a1:michelo", "【运营支持】第一轮面试", iso(Y, M, 15, 10, 0), iso(Y, M, 15, 12, 0)),
+  mk("google:a1:michelo", "【Stonebridge】会见赵贤宇", iso(Y, M, 15, 18, 0), iso(Y, M, 15, 19, 0)),
+  mk("google:a1:michelo", "【研究组】例会", iso(Y, M, 17, 16, 0), iso(Y, M, 17, 17, 0)),
+  mk("google:a1:michelo", "【首尔 TIPS】提交结项报告", day(Y, M, 18), day(Y, M, 19)),
+  mk("google:a1:ko.south_korea#holiday", "秋夕假期", day(Y, M, 24), day(Y, M, 27)),
+  mk("google:a1:ko.south_korea#holiday", "秋夕", day(Y, M, 25), day(Y, M, 26)),
+  mk("google:a1:michelo", "【Michelo】每周例会", iso(Y, M, 25, 17, 0), iso(Y, M, 25, 18, 0)),
+  mk("google:a1:michelo", "【Michelo】每周例会", iso(Y, M, 26, 17, 0), iso(Y, M, 26, 18, 0)),
+  mk("google:a1:ko.south_korea#holiday", "开天节", day(Y, M + 1, 3), day(Y, M + 1, 4)),
+  mk("google:a1:ko.south_korea#holiday", "国军日", day(Y, M + 1, 1), day(Y, M + 1, 2)),
+  mk("google:b2:work", "每周工作汇报", iso(Y, M, 2, 9, 30), iso(Y, M, 2, 10, 0)),
+  mk("google:b2:work", "季度复盘", iso(Y, M, 16, 14, 0), iso(Y, M, 16, 15, 30), { location: "总部 12 楼" }),
+  mk("google:b2:team", "团队工作坊", day(Y, M, 19), day(Y, M, 20)),
 ];
 
 let settings: Settings = {
@@ -177,7 +177,7 @@ const feedCalendars = (): CalendarInfo[] =>
   }));
 const syncIcsAccount = () => {
   accounts = accounts.map((a) =>
-    a.provider === "ics" ? { ...a, connected: feeds.length > 0, label: feeds.length ? `${feeds.length}개 구독` : "" } : a,
+    a.provider === "ics" ? { ...a, connected: feeds.length > 0, label: feeds.length ? `${feeds.length} 个订阅` : "" } : a,
   );
 };
 
@@ -244,7 +244,7 @@ export const mock = {
   respondEvent: async (calendarId: string, remoteId: string, responseStatus: InvitationResponse) => {
     await delay(300);
     const event = events.find((e) => e.calendarId === calendarId && e.remoteId === remoteId);
-    if (!event?.canRespond) throw new Error("이 일정에는 응답할 수 없습니다.");
+    if (!event?.canRespond) throw new Error("无法回复此日程的邀请。");
     const updated: CalEvent = {
       ...event,
       responseStatus,
@@ -255,7 +255,7 @@ export const mock = {
   },
   createEvent: async (input: EventInput) => {
     await delay(300);
-    if (!input.title.trim()) throw new Error("제목을 입력하세요.");
+    if (!input.title.trim()) throw new Error("请输入标题。");
     events = [
       ...events,
       mk(input.calendarId, input.title, input.start, input.end, {
@@ -295,8 +295,8 @@ export const mock = {
   listIcsFeeds: async () => feeds,
   addIcsFeed: async (name: string, url: string) => {
     await delay(500);
-    if (!/^(https?|webcal):\/\//i.test(url)) throw new Error("올바른 URL이 아닙니다. (http(s):// 또는 webcal://)");
-    const f: IcsFeed = { id: String(Date.now()), name: name || "iCal 구독", url, color: "#7986cb" };
+    if (!/^(https?|webcal):\/\//i.test(url)) throw new Error("订阅地址无效（须以 http://、https:// 或 webcal:// 开头）。");
+    const f: IcsFeed = { id: String(Date.now()), name: name || "iCal 订阅", url, color: "#7986cb" };
     feeds = [...feeds, f];
     syncIcsAccount();
     return f;

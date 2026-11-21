@@ -1,6 +1,8 @@
 import type { CalEvent } from "./types";
 import { addDays, diffDays, eventFirstDay, eventLastDay, eventStart } from "./dates";
 
+const titleCollator = new Intl.Collator("zh-CN");
+
 export interface PlacedEvent {
   ev: CalEvent;
   /** Column range within the week, inclusive. */
@@ -19,9 +21,9 @@ export interface PlacedEvent {
 
 export interface WeekLayout {
   placed: PlacedEvent[];
-  /** Per column: number of hidden events ("N개 더보기"). */
+  /** Per column: number of hidden events shown in the overflow label. */
   hidden: number[];
-  /** Per column: slot index where the "더보기" link sits (== limit). */
+  /** Per column: slot index of the overflow button (== limit). */
   limit: number[];
 }
 
@@ -32,7 +34,7 @@ export function isBar(ev: CalEvent): boolean {
 
 /**
  * Lay out events for one week (7 days from `weekStartDay`).
- * `maxSlots` = how many chip rows fit into a cell; the last one becomes the "더보기" row on overflow.
+ * `maxSlots` = how many chip rows fit into a cell; the last one contains the overflow button when needed.
  */
 export function layoutWeek(events: CalEvent[], weekStartDay: Date, maxSlots: number): WeekLayout {
   const weekEndDay = addDays(weekStartDay, 6);
@@ -65,12 +67,12 @@ export function layoutWeek(events: CalEvent[], weekStartDay: Date, maxSlots: num
       const la = a.endCol - a.startCol;
       const lb = b.endCol - b.startCol;
       if (la !== lb) return lb - la;
-      return a.ev.title.localeCompare(b.ev.title, "ko");
+      return titleCollator.compare(a.ev.title, b.ev.title);
     }
     const ta = eventStart(a.ev).getTime();
     const tb = eventStart(b.ev).getTime();
     if (ta !== tb) return ta - tb;
-    return a.ev.title.localeCompare(b.ev.title, "ko");
+    return titleCollator.compare(a.ev.title, b.ev.title);
   });
 
   // first-fit slot assignment
@@ -140,7 +142,7 @@ export function eventsOnDay(events: CalEvent[], day: Date): CalEvent[] {
     const ta = eventStart(a).getTime();
     const tb = eventStart(b).getTime();
     if (ta !== tb) return ta - tb;
-    return a.title.localeCompare(b.title, "ko");
+    return titleCollator.compare(a.title, b.title);
   });
   return list;
 }

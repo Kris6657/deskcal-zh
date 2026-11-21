@@ -8,6 +8,7 @@ import {
   connectGoogle,
   disconnectApple,
   disconnectGoogle,
+  GOOGLE_LOGIN_CANCELLED,
   listIcsFeeds,
   removeIcsFeed,
   saveSettings,
@@ -27,10 +28,10 @@ interface Props {
 }
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "accounts", label: "계정" },
-  { id: "calendars", label: "캘린더" },
-  { id: "notify", label: "알림" },
-  { id: "display", label: "표시" },
+  { id: "accounts", label: "账号" },
+  { id: "calendars", label: "日历" },
+  { id: "notify", label: "提醒" },
+  { id: "display", label: "显示" },
 ];
 
 export default function SettingsModal({ settings, accounts, calendars, onChange, onAccountsChanged, onClose }: Props) {
@@ -59,10 +60,10 @@ export default function SettingsModal({ settings, accounts, calendars, onChange,
 
   return (
     <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal" role="dialog" aria-label="설정">
+      <div className="modal" role="dialog" aria-label="设置">
         <div className="modal-head">
-          <h2>설정</h2>
-          <button type="button" className="btn btn-icon btn-close" onClick={onClose} aria-label="닫기">
+          <h2>设置</h2>
+          <button type="button" className="btn btn-icon btn-close" onClick={onClose} aria-label="关闭">
             ×
           </button>
         </div>
@@ -93,7 +94,7 @@ export default function SettingsModal({ settings, accounts, calendars, onChange,
   );
 }
 
-// ───────────────────────── 계정 ─────────────────────────
+// ───────────────────────── 账号 ─────────────────────────
 
 function AccountsPane({
   settings,
@@ -128,7 +129,7 @@ function AccountsPane({
       onAccountsChanged();
     } catch (e) {
       // A user-initiated cancel is not an error worth showing.
-      if (!String(e).includes("취소")) setGErr(String(e));
+      if (String(e) !== GOOGLE_LOGIN_CANCELLED) setGErr(String(e));
     } finally {
       setGBusy(false);
     }
@@ -150,7 +151,7 @@ function AccountsPane({
   };
   const doApple = async () => {
     if (!appleId.trim() || !appPw.trim()) {
-      setAErr("Apple ID와 앱 암호를 입력하세요.");
+      setAErr("请输入 Apple ID 和 App 专用密码。");
       return;
     }
     setABusy(true);
@@ -181,7 +182,7 @@ function AccountsPane({
     <>
       <section className="sec">
         <h3>
-          <GoogleLogo /> Google 캘린더
+          <GoogleLogo /> Google 日历
         </h3>
         {googles.length > 0 && (
           <ul className="acctlist">
@@ -189,8 +190,8 @@ function AccountsPane({
               <li key={g.id} className="acctrow">
                 <GoogleLogo />
                 <span className="acct-label" title={g.label}>
-                  {g.label || "Google 계정"}
-                  {!g.connected && <span className="acct-warn"> · 다시 로그인 필요</span>}
+                  {g.label || "Google 账号"}
+                  {!g.connected && <span className="acct-warn"> · 需要重新登录</span>}
                 </span>
                 <button
                   type="button"
@@ -198,7 +199,7 @@ function AccountsPane({
                   onClick={() => void undoGoogle(g.id)}
                   disabled={gBusy || gRowBusy !== null}
                 >
-                  {gRowBusy === g.id ? "해제 중…" : "연결 해제"}
+                  {gRowBusy === g.id ? "正在断开连接…" : "断开连接"}
                 </button>
               </li>
             ))}
@@ -206,28 +207,27 @@ function AccountsPane({
         )}
         <div className="row">
           <button type="button" className={`btn ${googles.length ? "btn-outline" : "btn-primary"}`} onClick={doGoogle} disabled={gBusy}>
-            {gBusy ? "브라우저에서 로그인 중…" : googles.length ? "+ Google 계정 추가" : "Google로 로그인"}
+            {gBusy ? "正在浏览器中登录…" : googles.length ? "+ 添加 Google 账号" : "使用 Google 登录"}
           </button>
           {gBusy && (
             <button type="button" className="btn btn-outline" onClick={cancelGoogle}>
-              취소
+              取消
             </button>
           )}
         </div>
-        {gBusy && <p className="help">브라우저에서 로그인을 마치면 자동으로 돌아옵니다. 창을 닫았다면 취소를 누르세요.</p>}
-        {googles.length > 0 && <p className="help">여러 Google 계정을 동시에 연결할 수 있습니다. 같은 계정으로 다시 로그인하면 권한이 갱신됩니다.</p>}
+        {gBusy && <p className="help">在浏览器中完成登录后将自动返回。若已关闭浏览器窗口，请点击「取消」。</p>}
+        {googles.length > 0 && <p className="help">可以同时连接多个 Google 账号。重新登录同一账号会更新授权。</p>}
         {gErr && <div className="err">{gErr}</div>}
         <button type="button" className="btn btn-link disclosure" onClick={() => setAdvOpen((v) => !v)}>
-          {advOpen ? "▾" : "▸"} 고급: OAuth 클라이언트 ID / 시크릿
+          {advOpen ? "▾" : "▸"} 高级设置（OAuth 客户端 ID 和密钥）
         </button>
         {advOpen && (
           <div className="adv">
             <p className="help">
-              Google Cloud Console → API 및 서비스 → 사용자 인증 정보에서 <b>'데스크톱 앱'</b> 유형의 OAuth 클라이언트를
-              만들고, Google Calendar API를 사용 설정한 뒤 값을 입력하세요.
+              在 Google Cloud Console → API 和服务 → 凭据中创建<b>「桌面应用」</b>类型的 OAuth 客户端，启用 Google Calendar API 后填写以下信息。
             </p>
             <label className="field">
-              <span>클라이언트 ID</span>
+              <span>客户端 ID</span>
               <input
                 type="text"
                 value={settings.google.clientId}
@@ -237,7 +237,7 @@ function AccountsPane({
               />
             </label>
             <label className="field">
-              <span>클라이언트 시크릿</span>
+              <span>客户端密钥</span>
               <input
                 type="password"
                 value={settings.google.clientSecret}
@@ -252,17 +252,16 @@ function AccountsPane({
 
       <section className="sec">
         <h3>
-          <AppleLogo /> Apple (iCloud) 캘린더
+          <AppleLogo /> Apple（iCloud）日历
         </h3>
         <p className="help">
-          iCloud 캘린더 연동에는 <b>appleid.apple.com</b> → 로그인 및 보안 → <b>앱 암호</b>에서 발급한 앱 전용 암호가
-          필요합니다. (일반 Apple ID 비밀번호는 사용할 수 없습니다.)
+          连接 iCloud 日历需要 App 专用密码。请前往 <b>appleid.apple.com</b> → 登录与安全 → <b>App 专用密码</b>生成密码。
         </p>
         {apple?.connected ? (
           <div className="row">
-            <span className="acct-label">{apple.label || "연결됨"}</span>
+            <span className="acct-label">{apple.label || "已连接"}</span>
             <button type="button" className="btn btn-outline" onClick={undoApple} disabled={aBusy}>
-              연결 해제
+              断开连接
             </button>
           </div>
         ) : (
@@ -278,7 +277,7 @@ function AccountsPane({
               />
             </label>
             <label className="field">
-              <span>앱 암호</span>
+              <span>App 专用密码</span>
               <input
                 type="password"
                 value={appPw}
@@ -290,7 +289,7 @@ function AccountsPane({
             </label>
             <div className="row">
               <button type="button" className="btn btn-primary" onClick={doApple} disabled={aBusy}>
-                {aBusy ? "연결 중…" : "iCloud 연결"}
+                {aBusy ? "正在连接…" : "连接 iCloud"}
               </button>
             </div>
           </>
@@ -303,7 +302,7 @@ function AccountsPane({
   );
 }
 
-// ───────────────────────── iCal 구독 ─────────────────────────
+// ───────────────────────── iCal 订阅 ─────────────────────────
 
 function IcsPane({ onAccountsChanged }: { onAccountsChanged: () => void }) {
   const [feeds, setFeeds] = useState<IcsFeed[] | null>(null);
@@ -327,7 +326,7 @@ function IcsPane({ onAccountsChanged }: { onAccountsChanged: () => void }) {
   const add = async () => {
     const u = url.trim();
     if (!u) {
-      setErr("URL을 입력하세요.");
+      setErr("请输入订阅地址。");
       return;
     }
     setBusy(true);
@@ -361,11 +360,10 @@ function IcsPane({ onAccountsChanged }: { onAccountsChanged: () => void }) {
   return (
     <section className="sec">
       <h3>
-        <FeedIcon /> iCal 구독 (URL)
+        <FeedIcon /> iCal 订阅（网址）
       </h3>
       <p className="help">
-        로그인 없이 캘린더를 <b>읽기 전용</b>으로 볼 수 있습니다. Google 캘린더 → 설정 → 해당 캘린더 →{" "}
-        <b>'비공개 주소(iCal 형식)'</b> URL을 복사해 붙여넣으세요. (<code>webcal://</code> 주소도 가능)
+        无需登录即可订阅<b>只读</b>日历。对于 Google 日历，请前往「设置」，选择要订阅的日历，复制并粘贴<b>「iCal 格式的私密地址」</b>。也支持 <code>webcal://</code> 地址。
       </p>
       {feeds && feeds.length > 0 && (
         <ul className="feedlist">
@@ -377,14 +375,14 @@ function IcsPane({ onAccountsChanged }: { onAccountsChanged: () => void }) {
                 {f.url}
               </span>
               <button type="button" className="btn btn-link btn-sm" onClick={() => void remove(f.id)} disabled={busy}>
-                삭제
+                删除
               </button>
             </li>
           ))}
         </ul>
       )}
       <div className="feed-add">
-        <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="이름 (예: 공휴일)" className="feed-name-input" />
+        <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="名称（例如法定节假日）" className="feed-name-input" />
         <input
           type="url"
           value={url}
@@ -394,7 +392,7 @@ function IcsPane({ onAccountsChanged }: { onAccountsChanged: () => void }) {
           onKeyDown={(e) => e.key === "Enter" && void add()}
         />
         <button type="button" className="btn btn-primary" onClick={() => void add()} disabled={busy}>
-          {busy ? "확인 중…" : "추가"}
+          {busy ? "处理中…" : "添加"}
         </button>
       </div>
       {err && <div className="err">{err}</div>}
@@ -412,7 +410,7 @@ function FeedIcon() {
   );
 }
 
-// ───────────────────────── 캘린더 ─────────────────────────
+// ───────────────────────── 日历 ─────────────────────────
 
 function CalendarsPane({
   settings,
@@ -436,7 +434,7 @@ function CalendarsPane({
   );
 
   if (calendars.length === 0) {
-    return <p className="help">연결된 계정이 없거나 아직 동기화되지 않았습니다. 계정 탭에서 로그인 후 동기화하세요.</p>;
+    return <p className="help">暂无已同步的日历。请在「账号」中登录后同步。</p>;
   }
 
   const mine = calendars.filter((c) => c.owned);
@@ -445,9 +443,9 @@ function CalendarsPane({
 
   return (
     <>
-      <CalendarGroup title="내 캘린더" list={mine} prefs={settings.calendars} multiAccount={multiAccount} setPrefs={setPrefs} />
-      <CalendarGroup title="다른 캘린더" list={others} prefs={settings.calendars} multiAccount={multiAccount} setPrefs={setPrefs} />
-      <p className="help">체크박스 = 표시 여부, 종 아이콘 = 해당 캘린더의 알림 수신 여부입니다.</p>
+      <CalendarGroup title="我的日历" list={mine} prefs={settings.calendars} multiAccount={multiAccount} setPrefs={setPrefs} />
+      <CalendarGroup title="其他日历" list={others} prefs={settings.calendars} multiAccount={multiAccount} setPrefs={setPrefs} />
+      <p className="help">勾选以显示日历，点击铃铛可开关该日历的提醒。</p>
     </>
   );
 }
@@ -522,7 +520,7 @@ const CalendarRow = memo(function CalendarRow({
   const color = c.isHoliday ? HOLIDAY_GREEN : (p.color ?? c.color);
   return (
     <li className="calrow">
-      <label className="calcheck" title={p.visible ? "숨기기" : "표시"}>
+      <label className="calcheck" title={p.visible ? "隐藏" : "显示"}>
         <input type="checkbox" checked={p.visible} onChange={(e) => setPrefs(c.id, { visible: e.target.checked })} />
         <span className="calbox" style={{ background: p.visible ? color : "transparent", borderColor: color }}>
           {p.visible && <CheckMark />}
@@ -531,20 +529,20 @@ const CalendarRow = memo(function CalendarRow({
       <span className="calname">
         {c.name}
         {!c.canEdit && (
-          <span className="cal-ro" title="읽기 전용 (일정 작성 불가)">
+          <span className="cal-ro" title="只读（无法创建日程）">
             🔒
           </span>
         )}
       </span>
-      <label className="swatch" title="색상 변경" style={{ background: color }}>
+      <label className="swatch" title="更改颜色" style={{ background: color }}>
         <input type="color" value={toHex6(color)} onChange={(e) => setPrefs(c.id, { color: e.target.value })} />
       </label>
       <button
         type="button"
         className={`btn btn-icon bell${p.notify ? " on" : ""}`}
         onClick={() => setPrefs(c.id, { notify: !p.notify })}
-        title={p.notify ? "알림 받는 중 (클릭하여 끄기)" : "알림 꺼짐 (클릭하여 켜기)"}
-        aria-label="알림 토글"
+        title={p.notify ? "提醒已开启（点击关闭）" : "提醒已关闭（点击开启）"}
+        aria-label="切换提醒"
       >
         <BellIcon off={!p.notify} />
       </button>
@@ -552,29 +550,29 @@ const CalendarRow = memo(function CalendarRow({
   );
 });
 
-// ───────────────────────── 알림 ─────────────────────────
+// ───────────────────────── 提醒 ─────────────────────────
 
 const REMINDER_OPTIONS: { v: number; label: string }[] = [
-  { v: -1, label: "없음" },
-  { v: 0, label: "정각" },
-  { v: 5, label: "5분 전" },
-  { v: 10, label: "10분 전" },
-  { v: 15, label: "15분 전" },
-  { v: 30, label: "30분 전" },
-  { v: 60, label: "1시간 전" },
+  { v: -1, label: "不提醒" },
+  { v: 0, label: "日程开始时" },
+  { v: 5, label: "提前 5 分钟" },
+  { v: 10, label: "提前 10 分钟" },
+  { v: 15, label: "提前 15 分钟" },
+  { v: 30, label: "提前 30 分钟" },
+  { v: 60, label: "提前 1 小时" },
 ];
 
 function NotifyPane({ settings, patch }: { settings: Settings; patch: (p: Partial<Settings>) => void }) {
   return (
     <section className="sec">
       <Toggle
-        label="알림 사용"
-        desc="일정 시작 시각에 맞춰 Windows 알림을 표시합니다."
+        label="启用提醒"
+        desc="在设定时间显示 Windows 通知。"
         checked={settings.notificationsEnabled}
         onChange={(v) => patch({ notificationsEnabled: v })}
       />
       <label className="field inline">
-        <span>기본 알림 시간</span>
+        <span>默认提醒时间</span>
         <select
           value={settings.defaultReminderMin}
           onChange={(e) => patch({ defaultReminderMin: Number(e.target.value) })}
@@ -587,9 +585,9 @@ function NotifyPane({ settings, patch }: { settings: Settings; patch: (p: Partia
           ))}
         </select>
       </label>
-      <p className="help">일정에 알림이 따로 설정되어 있지 않을 때 사용됩니다.</p>
+      <p className="help">日程未单独设置提醒时使用此选项。</p>
       <label className="field inline">
-        <span>종일 일정 알림 시각</span>
+        <span>全天日程提醒时间</span>
         <input
           type="time"
           value={settings.allDayReminderTime}
@@ -597,17 +595,17 @@ function NotifyPane({ settings, patch }: { settings: Settings; patch: (p: Partia
           disabled={!settings.notificationsEnabled}
         />
       </label>
-      <p className="help">캘린더별 알림 켜기/끄기는 캘린더 탭의 종 아이콘으로 설정합니다.</p>
+      <p className="help">在「日历」页中点击铃铛，可单独设置各日历的提醒。</p>
     </section>
   );
 }
 
-// ───────────────────────── 표시 ─────────────────────────
+// ───────────────────────── 显示 ─────────────────────────
 
 const MODES: { v: WindowMode; label: string; desc: string }[] = [
-  { v: "floating", label: "일반 창", desc: "작업표시줄에는 표시되지 않고 트레이 아이콘으로 열고 닫습니다." },
-  { v: "desktop", label: "바탕화면 위젯", desc: "바탕화면 위에 고정됩니다. 아이콘 위, 다른 창 아래. 조작 가능. Win+D에도 유지." },
-  { v: "wallpaper", label: "배경화면", desc: "바탕화면 아이콘 뒤에 표시됩니다 (조작 불가, 보기 전용)." },
+  { v: "floating", label: "普通窗口", desc: "通过系统托盘图标打开和隐藏，任务栏不显示窗口按钮。" },
+  { v: "desktop", label: "桌面小组件", desc: "位于桌面图标上方、其他窗口下方，可交互。按 Win+D 后仍显示。" },
+  { v: "wallpaper", label: "桌面背景", desc: "位于桌面图标下方，仅供查看。" },
 ];
 
 function DisplayPane({ settings, patch }: { settings: Settings; patch: (p: Partial<Settings>) => void }) {
@@ -619,7 +617,7 @@ function DisplayPane({ settings, patch }: { settings: Settings; patch: (p: Parti
   return (
     <>
       <section className="sec">
-        <h3>창 모드</h3>
+        <h3>窗口模式</h3>
         <div className="radios">
           {MODES.map((m) => (
             <label key={m.v} className={`radio${settings.windowMode === m.v ? " active" : ""}`}>
@@ -632,7 +630,7 @@ function DisplayPane({ settings, patch }: { settings: Settings; patch: (p: Parti
       </section>
       <section className="sec">
         <label className="field inline">
-          <span>배경 불투명도</span>
+          <span>背景不透明度</span>
           <input
             type="range"
             min={0.2}
@@ -644,50 +642,50 @@ function DisplayPane({ settings, patch }: { settings: Settings; patch: (p: Parti
           <span className="val">{Math.round(settings.opacity * 100)}%</span>
         </label>
         <div className="field inline">
-          <span>테마</span>
+          <span>主题</span>
           <Segmented
             value={settings.theme}
             onChange={(v) => patch({ theme: v })}
             options={[
-              { v: "system", label: "Windows 설정 따라가기", title: "Windows의 라이트/다크 모드 설정을 그대로 따릅니다." },
-              { v: "light", label: "라이트" },
-              { v: "dark", label: "다크" },
+              { v: "system", label: "跟随 Windows", title: "跟随 Windows 的浅色或深色模式。" },
+              { v: "light", label: "浅色" },
+              { v: "dark", label: "深色" },
             ]}
           />
         </div>
         <div className="field inline">
-          <span>스타일</span>
+          <span>样式</span>
           <Segmented
             value={settings.style ?? "glass"}
             onChange={(v) => patch({ style: v })}
             options={[
-              { v: "glass", label: "리퀴드 글래스", swatch: "glass", title: "반투명 유리 질감, 블러와 광택" },
-              { v: "flat", label: "플랫", swatch: "flat", title: "불투명한 단색 표면, 효과 없음" },
+              { v: "glass", label: "液态玻璃", swatch: "glass", title: "半透明玻璃，带模糊和光泽效果" },
+              { v: "flat", label: "纯色", swatch: "flat", title: "不透明的纯色背景" },
             ]}
           />
         </div>
         <label className="field inline">
-          <span>주 시작 요일</span>
+          <span>每周起始日</span>
           <select value={settings.weekStart} onChange={(e) => patch({ weekStart: Number(e.target.value) as 0 | 1 })}>
-            <option value={0}>일요일</option>
-            <option value={1}>월요일</option>
+            <option value={0}>星期日</option>
+            <option value={1}>星期一</option>
           </select>
         </label>
         <label className="field inline">
-          <span>동기화 주기</span>
+          <span>同步间隔</span>
           <select value={settings.syncIntervalMin} onChange={(e) => patch({ syncIntervalMin: Number(e.target.value) })}>
             {[5, 10, 15, 30, 60].map((n) => (
               <option key={n} value={n}>
-                {n}분
+                {n} 分钟
               </option>
             ))}
           </select>
         </label>
-        <Toggle label="시작 시 자동 실행" desc="Windows 로그인 시 트레이에 자동으로 실행됩니다." checked={settings.autostart} onChange={(v) => patch({ autostart: v })} />
+        <Toggle label="开机自启" desc="登录 Windows 后自动启动，并在系统托盘显示图标。" checked={settings.autostart} onChange={(v) => patch({ autostart: v })} />
         {settings.autostart && (
           <Toggle
-            label="시작할 때 창 바로 표시"
-            desc="끄면 트레이에만 조용히 시작합니다."
+            label="启动时显示窗口"
+            desc="关闭后，启动时只显示系统托盘图标。"
             checked={settings.autostartVisible ?? true}
             onChange={(v) => patch({ autostartVisible: v })}
           />
@@ -699,7 +697,7 @@ function DisplayPane({ settings, patch }: { settings: Settings; patch: (p: Parti
 
 // ───────────────────────── bits ─────────────────────────
 
-/** Pill-shaped segmented control (테마 / 스타일 선택). */
+/** Pill-shaped segmented control for theme and style selection. */
 function Segmented<T extends string>({
   value,
   options,

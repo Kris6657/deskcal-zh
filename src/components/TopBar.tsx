@@ -19,17 +19,17 @@ interface Props {
 // Memoized: only month, sync state or window mode changes re-render the toolbar.
 const TopBar = memo(function TopBar(p: Props) {
   countRender("TopBar");
-  const syncTitle = p.syncedAt ? `마지막 동기화: ${fmtSyncedAt(p.syncedAt)}` : "동기화";
+  const syncTitle = p.syncedAt ? `上次同步：${fmtSyncedAt(p.syncedAt)}` : "同步";
   return (
     <header className="topbar" data-tauri-drag-region>
       <div className="topbar-left" data-tauri-drag-region>
         <button type="button" className="btn btn-today" onClick={p.onToday}>
-          오늘
+          今天
         </button>
-        <button type="button" className="btn btn-icon" onClick={p.onPrev} aria-label="이전 달" title="이전 달">
+        <button type="button" className="btn btn-icon" onClick={p.onPrev} aria-label="上个月" title="上个月">
           <Chevron dir="left" />
         </button>
-        <button type="button" className="btn btn-icon" onClick={p.onNext} aria-label="다음 달" title="다음 달">
+        <button type="button" className="btn btn-icon" onClick={p.onNext} aria-label="下个月" title="下个月">
           <Chevron dir="right" />
         </button>
         <h1 className="topbar-title" data-tauri-drag-region>
@@ -38,13 +38,13 @@ const TopBar = memo(function TopBar(p: Props) {
       </div>
       <div className="topbar-right">
         {p.compact ? (
-          <button type="button" className="btn btn-icon" onClick={p.onAdd} aria-label="일정 추가" title="일정 추가">
+          <button type="button" className="btn btn-icon" onClick={p.onAdd} aria-label="新建日程" title="新建日程">
             <PlusIcon />
           </button>
         ) : (
-          <button type="button" className="btn btn-add" onClick={p.onAdd} title="일정 추가">
+          <button type="button" className="btn btn-add" onClick={p.onAdd} title="新建日程">
             <PlusIcon />
-            <span>일정 추가</span>
+            <span>新建日程</span>
           </button>
         )}
         <button
@@ -52,16 +52,16 @@ const TopBar = memo(function TopBar(p: Props) {
           className={`btn btn-icon${p.syncing ? " spinning" : ""}`}
           onClick={p.onSync}
           disabled={p.syncing}
-          aria-label="동기화"
+          aria-label="同步"
           title={syncTitle}
         >
           <SyncIcon />
         </button>
-        <button type="button" className="btn btn-icon" onClick={p.onSettings} aria-label="설정" title="설정">
+        <button type="button" className="btn btn-icon" onClick={p.onSettings} aria-label="设置" title="设置">
           <GearIcon />
         </button>
         {!p.compact && (
-          <button type="button" className="btn btn-icon" onClick={p.onHide} aria-label="숨기기" title="트레이로 숨기기">
+          <button type="button" className="btn btn-icon" onClick={p.onHide} aria-label="隐藏" title="隐藏到系统托盘">
             <MinimizeIcon />
           </button>
         )}

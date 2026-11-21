@@ -25,7 +25,7 @@ export default function DayMore({ day, events, calendars, colorOf, anchor, onClo
       <div className="daymore-head">
         <div className="daymore-wd">{WEEKDAY_LABELS[day.getDay()]}</div>
         <div className="daymore-num">{day.getDate()}</div>
-        <button type="button" className="btn btn-icon btn-close" onClick={onClose} aria-label="닫기">
+        <button type="button" className="btn btn-icon btn-close" onClick={onClose} aria-label="关闭">
           ×
         </button>
       </div>
@@ -41,11 +41,11 @@ export default function DayMore({ day, events, calendars, colorOf, anchor, onClo
             listStyle
           />
         ))}
-        {list.length === 0 && <div className="daymore-empty">일정 없음</div>}
+        {list.length === 0 && <div className="daymore-empty">暂无日程</div>}
       </div>
       {onAdd && (
         <button type="button" className="daymore-add" onClick={onAdd}>
-          + 일정 추가
+          + 新建日程
         </button>
       )}
     </Popover>

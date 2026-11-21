@@ -4,7 +4,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Manager};
 
-const KEYRING_SERVICE: &str = "DeskCal";
+const KEYRING_SERVICE: &str = "com.nochiski.deskcal.zhcn";
 
 pub struct Paths {
     pub settings: PathBuf,
@@ -157,10 +157,10 @@ pub fn get_secret(key: &str) -> Option<String> {
 }
 
 pub fn set_secret(key: &str, value: &str) -> Result<(), String> {
-    let entry = keyring::Entry::new(KEYRING_SERVICE, key).map_err(|e| e.to_string())?;
+    let entry = keyring::Entry::new(KEYRING_SERVICE, key).map_err(|e| format!("无法打开凭据存储：{e}"))?;
     entry
         .set_password(value)
-        .map_err(|e| format!("자격 증명 저장 실패: {e}"))
+        .map_err(|e| format!("保存凭据失败：{e}"))
 }
 
 pub fn delete_secret(key: &str) {
