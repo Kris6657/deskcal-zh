@@ -2,6 +2,17 @@
 
 DeskCal 是 Windows 桌面日历，可以同步 Google 日历、iCloud 日历和 iCal 订阅。中文版基于 [Nochiski 的 DeskCal v0.1.3](https://github.com/Nochiski/deskcal/releases/tag/v0.1.3)，提供简体中文界面、托盘菜单、提醒和安装器。
 
+[下载 Windows x64 安装包](https://github.com/Kris6657/deskcal-zh/releases/tag/v0.1.3-zh-CN)
+
+## 为什么 Fork
+
+原版使用韩文界面。为了让习惯用简体中文的用户更方便地查看日历、编辑日程和调整设置，我基于原版制作了这个中文版。
+
+## 中文版改了什么
+
+- **界面汉化**：月历、设置、日程编辑、系统托盘、提醒和安装器均使用简体中文。日期按中文习惯显示，时间采用 24 小时制。
+- **独立安装**：新安装默认使用 `%LOCALAPPDATA%\Deskcal-zh`。中文版使用独立配置和凭据，可以与原版并存。
+
 ## 安装
 
 1. 在本仓库的 Releases 页面下载 Windows x64 的 `-setup.exe` 安装包。
